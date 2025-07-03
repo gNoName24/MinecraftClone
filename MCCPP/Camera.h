@@ -31,10 +31,10 @@ public:
 
 	// ќсновные настройки камеры
 	float fov = 70.0f;
-	float renderMinDistance = 0.05f;
-	float renderMaxDistance = 512.0f;
+	float renderMinDistance = 0.1f;
+	float renderMaxDistance = 1024.0f;
 
-	float cameraSpeed = 15.0f;
+	float cameraSpeed = 75.0f;
 
 	glm::vec2 screenSize = glm::vec2(800.0f, 600.0f); // —юда надо задавать размер окна
 

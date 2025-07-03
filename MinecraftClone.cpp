@@ -145,6 +145,8 @@ int main() {
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
+    glfwSwapInterval(0);
+
     // Если окно ресайзнулось
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     // Нажалась клавиша
@@ -168,27 +170,96 @@ int main() {
 
 	camera.cameraShader = &shader;
 
-    vector<float> map = concat<float>({
-        ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
-        ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
-        ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
-        ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
+    vector<GLfloat> map = concat<GLfloat>({
+        //ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
+        //ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
+        //ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
+        //ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
+        //ObjectTool::polyRect(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 10.0f))
 	});
 
-    GLuint VBO, VAO;
+    vector<GLuint> indices = {};
+
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    noise.SetFrequency(0.05f);
+
+	int width = 256;
+	int height = 256;
+    for(int z = 0; z < height; z++) {
+        for(int x = 0; x < width; x++) {
+			GLfloat glx = static_cast<GLfloat>(x);
+            GLfloat glz = static_cast<GLfloat>(z);
+
+            map.insert(map.end(), {
+                glx,     noise.GetNoise((float)x, (float)z) * 10.0f, glz,
+                glx + 1, noise.GetNoise((float)x+1, (float)z) * 10.0f, glz,
+                glx,     noise.GetNoise((float)x, (float)z+1) * 10.0f, glz + 1,
+                glx + 1, noise.GetNoise((float)x+1, (float)z+1) * 10.0f, glz + 1
+            });
+
+            GLuint start = (x + z * width) * 4;
+            indices.insert(indices.end(), {
+                start + 0, start + 1, start + 2,
+                start + 2, start + 1, start + 3
+            });
+        }
+	}
+    /*for (int i = 0; i < width * height; i++) {
+        vector<GLfloat> preset = {
+			1.0f * i, 0.0f, 1.0f * i,
+            (1.0f * i) + 1, 0.0f, 0.0f,
+            0.0f, 0.0f, (1.0f * i) + 1,
+            (1.0f * i) + 1, 0.0f, (1.0f * i) + 1,
+        };
+        map.insert(map.end(), preset.begin(), preset.end());
+
+        vector<GLuint> preset2 = {
+            0 + ((GLuint)i*4), 1 + ((GLuint)i * 4), 2 + ((GLuint)i * 4),
+            2 + ((GLuint)i * 4), 1 + ((GLuint)i * 4), 3 + ((GLuint)i * 4)
+        };
+        indices.insert(indices.end(), preset2.begin(), preset2.end());
+    }*/
+
+    /*auto [map, indices] = ObjectTool::polyRectEBO({
+        0.0f, 1.0f, 0.0f,
+        1.0f, 2.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 1.0f,
+    });*/
+
+    GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, map.size() * sizeof(float), map.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, map.size() * sizeof(GLfloat), map.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
      
     glBindVertexArray(0);
 
+    double lastTime = 0.0;
+    int nbFrames = 0;
+
     while(!glfwWindowShouldClose(window)) {
+        double currentTime = glfwGetTime();
+        nbFrames++;
+
+        // Печать каждые 1.0 секунды
+        if (currentTime - lastTime >= 1.0) {
+            std::cout << "FPS: " << nbFrames << std::endl;
+            nbFrames = 0;
+            lastTime = currentTime;
+        }
+
 		updateDeltaTime();
         glfwPollEvents();
 
@@ -204,7 +275,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, map.size() / 3);
+        //glDrawArrays(GL_TRIANGLES, 0, map.size() / 3);
+        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
