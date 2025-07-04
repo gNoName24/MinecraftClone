@@ -44,53 +44,6 @@ void updateDeltaTime() {
 
 Camera camera;
 
-/*std::vector<float> GenerateMesh(int width, int height) {
-    // Тут целый квадрат без EBO, нужно потом это реализовать
-    std::vector<float> preset = {
-        0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f,
-
-        1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f
-    };
-
-    int presetVertexCount = preset.size() / 3;
-    std::vector<float> map(width * height * presetVertexCount * 3);
-
-    for(int i = 0; i < width * height; ++i) {
-        int chunkX = i % width;
-        int chunkZ = i / width;
-
-        for(int j = 0; j < presetVertexCount; ++j) {
-            int mapIndex = (i * presetVertexCount + j) * 3;
-
-            float x = preset[j * 3 + 0] + chunkX;
-            float y = 0.0f;
-            float z = preset[j * 3 + 2] + chunkZ;
-
-            map[mapIndex + 0] = x;
-            map[mapIndex + 1] = y;
-            map[mapIndex + 2] = z;
-        }
-    }
-
-    return map;
-}
-
-void ApplyPerlinNoise(std::vector<float>& map, int width, int height) {
-    FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise.SetFrequency(0.05f);
-
-    for(int i = 0; i < map.size(); i += 3) {
-        float x = map[i];
-        float z = map[i + 2];
-        map[i + 1] = noise.GetNoise(x, z) * 16.0f;
-    }
-}*/
-
 std::string readFile(const std::string& filename) {
     std::ifstream file(filename);
     if(!file) return {};
@@ -205,6 +158,8 @@ int main() {
             });
         }
 	}
+
+    // Устарело
     /*for (int i = 0; i < width * height; i++) {
         vector<GLfloat> preset = {
 			1.0f * i, 0.0f, 1.0f * i,

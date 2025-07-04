@@ -35,6 +35,7 @@ namespace ObjectTool {
         };
     }
 
+    // Криво сделано, надо переделать функцию 
     /*pair<vector<GLfloat>, vector<GLuint>> polyRectEBO(vector<GLfloat> v) {
         vector<GLfloat> vertices = v;
         vector<GLuint> indices = {
