@@ -14,7 +14,7 @@ using namespace std;
 
 class Camera {
 public:
-	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 position = glm::vec3(128, 30, 128);
 
 	glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -30,13 +30,18 @@ public:
 	bool keys[1024];
 
 	// ќсновные настройки камеры
-	float fov = 70.0f;
+	float fov = 90.0f;
 	float renderMinDistance = 0.1f;
-	float renderMaxDistance = 1024.0f;
+	float renderMaxDistance = 4096.0f;
 
-	float cameraSpeed = 75.0f;
+	float cameraSpeed = 7.50f;
 
 	glm::vec2 screenSize = glm::vec2(800.0f, 600.0f); // —юда надо задавать размер окна
+
+	glm::vec3 getFront() const {
+		return front;
+	}
+
 
 	void updateCamera() {
 		if(cameraShader == 0) {
@@ -81,6 +86,15 @@ public:
 		if (keys[GLFW_KEY_Q])
 			position += speed * glm::normalize(-up);
 	}
+
+	glm::mat4 getViewMatrix() const {
+		return glm::lookAt(position, position + front, up);
+	}
+
+	glm::mat4 getProjection() const {
+		return glm::perspective(glm::radians(fov), screenSize.x / screenSize.y, renderMinDistance, renderMaxDistance);
+	}
+
 
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 		GLfloat xoffset = xpos - lastX;

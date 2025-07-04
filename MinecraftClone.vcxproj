@@ -131,13 +131,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="libs\src\glad.c" />
     <ClCompile Include="MinecraftClone.cpp" />
+    <ClCompile Include="ObjectTool.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="MCCPP\Camera.h" />
     <ClInclude Include="MCCPP\ObjectTool.h" />
     <ClInclude Include="MCCPP\Shader.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
