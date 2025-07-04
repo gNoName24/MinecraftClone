@@ -6,6 +6,14 @@
 
 using namespace std;
 
+template<typename T>
+std::vector<T> concat(std::initializer_list<std::vector<T>> lists) {
+    std::vector<T> result;
+    for (const auto& l : lists)
+        result.insert(result.end(), l.begin(), l.end());
+    return result;
+}
+
 namespace ObjectTool {
     vector<GLfloat> polygon(glm::vec3 targetPos, glm::vec3 translate) {
         return
@@ -34,6 +42,59 @@ namespace ObjectTool {
             minX, minY, minZ
         };
     }
+
+    vector<GLfloat> polyCube(glm::vec3 position, glm::vec3 size) {
+        return {
+            // Нижняя грань (0, -1, 0)
+            position.x, position.y, position.z,                             0.0f, -1.0f,  0.0f,
+            position.x + size.x, position.y, position.z,                    0.0f, -1.0f,  0.0f,
+            position.x, position.y, position.z + size.z,                    0.0f, -1.0f,  0.0f,
+            position.x + size.x, position.y, position.z + size.z,           0.0f, -1.0f,  0.0f,
+            position.x + size.x, position.y, position.z,                    0.0f, -1.0f,  0.0f,
+            position.x, position.y, position.z + size.z,                    0.0f, -1.0f,  0.0f,
+
+            // Верхняя грань (0, 1, 0)
+            position.x, position.y + size.y, position.z,                    0.0f,  1.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z,           0.0f,  1.0f,  0.0f,
+            position.x, position.y + size.y, position.z + size.z,           0.0f,  1.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z + size.z,  0.0f,  1.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z,           0.0f,  1.0f,  0.0f,
+            position.x, position.y + size.y, position.z + size.z,           0.0f,  1.0f,  0.0f,
+
+            // Правая грань (1, 0, 0)
+            position.x + size.x, position.y, position.z,                    1.0f,  0.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z,           1.0f,  0.0f,  0.0f,
+            position.x + size.x, position.y, position.z + size.z,           1.0f,  0.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z + size.z,  1.0f,  0.0f,  0.0f,
+            position.x + size.x, position.y + size.y, position.z,           1.0f,  0.0f,  0.0f,
+            position.x + size.x, position.y, position.z + size.z,           1.0f,  0.0f,  0.0f,
+
+            // Левая грань (-1, 0, 0)
+            position.x, position.y, position.z,                            -1.0f,  0.0f,  0.0f,
+            position.x, position.y + size.y, position.z,                   -1.0f,  0.0f,  0.0f,
+            position.x, position.y, position.z + size.z,                   -1.0f,  0.0f,  0.0f,
+            position.x, position.y + size.y, position.z + size.z,          -1.0f,  0.0f,  0.0f,
+            position.x, position.y + size.y, position.z,                   -1.0f,  0.0f,  0.0f,
+            position.x, position.y, position.z + size.z,                   -1.0f,  0.0f,  0.0f,
+
+            // Задняя грань (0, 0, 1)
+            position.x, position.y, position.z + size.z,                    0.0f,  0.0f,  1.0f,
+            position.x, position.y + size.y, position.z + size.z,           0.0f,  0.0f,  1.0f,
+            position.x + size.x, position.y, position.z + size.z,           0.0f,  0.0f,  1.0f,
+            position.x + size.x, position.y + size.y, position.z + size.z,  0.0f,  0.0f,  1.0f,
+            position.x, position.y + size.y, position.z + size.z,           0.0f,  0.0f,  1.0f,
+            position.x + size.x, position.y, position.z + size.z,           0.0f,  0.0f,  1.0f,
+
+            // Передняя грань (0, 0, -1)
+            position.x, position.y, position.z,                             0.0f,  0.0f, -1.0f,
+            position.x, position.y + size.y, position.z,                    0.0f,  0.0f, -1.0f,
+            position.x + size.x, position.y, position.z,                    0.0f,  0.0f, -1.0f,
+            position.x + size.x, position.y + size.y, position.z,           0.0f,  0.0f, -1.0f,
+            position.x, position.y + size.y, position.z,                    0.0f,  0.0f, -1.0f,
+            position.x + size.x, position.y, position.z,                    0.0f,  0.0f, -1.0f,
+        };
+    }
+
 
     // Криво сделано, надо переделать функцию 
     /*pair<vector<GLfloat>, vector<GLuint>> polyRectEBO(vector<GLfloat> v) {

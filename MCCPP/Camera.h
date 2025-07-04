@@ -19,13 +19,15 @@ public:
 	glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
+	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 
 	GLdouble lastX = 0, lastY = 0;
 	GLfloat yaw = -90.0f; // Влево или вправо
 	GLfloat pitch = 0.0f; // Наклон вперед или вниз
 
-	Shader* cameraShader; // Указатель на класс шейдера. Указатель потому-что со временем может появится необходимость менять шейдеры
+	// Shader* cameraShader; // Указатель на класс шейдера. Указатель потому-что со временем может появится необходимость менять шейдеры
+	//						 Теперь не нужен
 
 	bool keys[1024];
 
@@ -39,23 +41,32 @@ public:
 	glm::vec2 screenSize = glm::vec2(800.0f, 600.0f); // Сюда надо задавать размер окна
 
 	void updateCamera() {
-		if(cameraShader == 0) {
-			cout << "cameraShader не установлен" << endl;
-			return;
-		}
-
 		// Создание матриц
 		// glm::mat4 model = glm::mat4(1.0f); // Матрица модели, не используется в камере
-		glm::mat4 view = glm::mat4(1.0f); // Матрица вида
-		glm::mat4 projection = glm::mat4(1.0f); // Матрица проекции
+		view = glm::mat4(1.0f); // Матрица вида
+		projection = glm::mat4(1.0f); // Матрица проекции
 
 		view = glm::lookAt(position, position + front, up);
 
 		projection = glm::perspective(glm::radians(fov), screenSize.x / screenSize.y, renderMinDistance, renderMaxDistance);
 
 		// Передача матриц в шейдер
-		cameraShader->setMat4fv("view", view);
-		cameraShader->setMat4fv("projection", projection);
+		// Тепеь не нужно, используется другая функция для того чтобы можно было передавать матрицы сразу в несколько шейдеров
+		/*cameraShader->setMat4fv("view", view);
+		cameraShader->setMat4fv("projection", projection);*/
+	}
+
+	void setMatsToShader(Shader* shader) {
+		if (shader == nullptr) {
+			cout << "shader не установлен" << endl;
+			return;
+		}
+		view = glm::mat4(1.0f);
+		projection = glm::mat4(1.0f);
+		view = glm::lookAt(position, position + front, up);
+		shader->setMat4fv("view", view);
+		projection = glm::perspective(glm::radians(fov), screenSize.x / screenSize.y, renderMinDistance, renderMaxDistance);
+		shader->setMat4fv("projection", projection);
 	}
 
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {

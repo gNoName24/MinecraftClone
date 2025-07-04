@@ -1,11 +1,11 @@
-#include <glad/glad.h>
+Ôªø#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// ƒÎˇ Í‡ÚËÌÓÍ
+// –î–ª—è –∫–∞—Ä—Ç–∏–Ω–æ–∫
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -30,36 +30,27 @@
 
 using namespace std;
 
-float WIDTH = 1280.0f;
-float HEIGHT = 720.0f;
+float WIDTH = 800.0f;
+float HEIGHT = 600.0f;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
 void updateDeltaTime() {
-    GLfloat currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 }
 
 Camera camera;
 
 std::string readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if(!file) return {};
+	std::ifstream file(filename);
+	if(!file) return {};
 
-    std::ostringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
-
-// œÓÎÂÁÌ‡ˇ ¯ÚÛÍ‡
-template<typename T>
-std::vector<T> concat(std::initializer_list<std::vector<T>> lists) {
-    std::vector<T> result;
-    for (const auto& l : lists)
-        result.insert(result.end(), l.begin(), l.end());
-    return result;
+	std::ostringstream buffer;
+	buffer << file.rdbuf();
+	return buffer.str();
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -67,190 +58,216 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 int main() {
-	// –ÛÒÒÍËÈ ˇÁ˚Í ‚ ÍÓÌÒÓÎË
-    std::locale::global(std::locale("Russian"));
-    std::wcout.imbue(std::locale());
-    SetConsoleOutputCP(65001);
-    SetConsoleCP(65001);
+	// –†—É—Å—Å–∫–∏–π —è–∑—ã–∫ –≤ –∫–æ–Ω—Å–æ–ª–∏
+	std::locale::global(std::locale("Russian"));
+	std::wcout.imbue(std::locale());
+	SetConsoleOutputCP(65001);
+	SetConsoleCP(65001);
 
-    std::cout << "–‡·Ó˜‡ˇ ‰ËÂÍÚÓËˇ: " << filesystem::current_path() << std::endl;
+	std::cout << "–†–∞–±–æ—á–∞—è –¥–∏—Ä–µ–∫—Ç–æ—Ä–∏—è: " << filesystem::current_path() << std::endl;
 
-	// »ÌËˆË‡ÎËÁ‡ˆËˇ GLFW Ò OpenGL 3.3 (Core Profile)
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	// –ò–Ω–∏—Ü–∏–∞–ª–∏–∑–∞—Ü–∏—è GLFW —Å OpenGL 3.3 (Core Profile)
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// —ÓÁ‰‡ÌËÂ ÓÍÌ‡
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Minecraft Clone", NULL, NULL);
-    if(window == NULL) {
-        std::cout << "ŒÍÌÓ ÌÂ ÒÓÁ‰‡ÎÓÒ¸, ıÁ ÔÓ˜ÂÏÛ" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
+	// –°–æ–∑–¥–∞–Ω–∏–µ –æ–∫–Ω–∞
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Minecraft Clone", NULL, NULL);
+	if(window == NULL) {
+		std::cout << "–û–∫–Ω–æ –Ω–µ —Å–æ–∑–¥–∞–ª–æ—Å—å, —Ö–∑ –ø–æ—á–µ–º—É" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
 
-	// »ÌËˆË‡ÎËÁ‡ˆËˇ GLAD
-    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "œÓ˜ÂÏÛ-ÚÓ GLAD ÌÂ ËÌËˆË‡ÎËÁËÓ‚‡ÎÒˇ, ‡Á·Ë‡ÈÒˇ" << std::endl;
-        return -1;
-    }
+	// –ò–Ω–∏—Ü–∏–∞–ª–∏–∑–∞—Ü–∏—è GLAD
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		std::cout << "–ü–æ—á–µ–º—É-—Ç–æ GLAD –Ω–µ –∏–Ω–∏—Ü–∏–∞–ª–∏–∑–∏—Ä–æ–≤–∞–ª—Å—è, —Ä–∞–∑–±–∏—Ä–∞–π—Å—è" << std::endl;
+		return -1;
+	}
 
-    glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, WIDTH, HEIGHT);
 
-    glfwSwapInterval(0);
+	// –í–∫–ª—é—á–∏ –µ—Å–ª–∏ —Ö–æ—á–µ—Ç—Å—è —Å–Ω—è—Ç—å –æ–≥—Ä–∞–Ω–∏—á–µ–Ω–∏–µ —Ñ–ø—Å
+	// glfwSwapInterval(0);
 
-    // ≈ÒÎË ÓÍÌÓ ÂÒ‡ÈÁÌÛÎÓÒ¸
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    // Õ‡Ê‡Î‡Ò¸ ÍÎ‡‚Ë¯‡
-    glfwSetKeyCallback(window, key_callback);
-	// ƒ‚ËÊÂÌËÂ Ï˚¯Ë
-    glfwSetCursorPosCallback(window, mouse_callback);
+	// –ï—Å–ª–∏ –æ–∫–Ω–æ —Ä–µ—Å–∞–π–∑–Ω—É–ª–æ—Å—å
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	// –ù–∞–∂–∞–ª–∞—Å—å –∫–ª–∞–≤–∏—à–∞
+	glfwSetKeyCallback(window, key_callback);
+	// –î–≤–∏–∂–µ–Ω–∏–µ –º—ã—à–∏
+	glfwSetCursorPosCallback(window, mouse_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    glfwGetCursorPos(window, &camera.lastX, &camera.lastY);
+	glfwGetCursorPos(window, &camera.lastX, &camera.lastY);
 
-    // √ÂÌÂ‡ˆËˇ ÔÎÓÒÍÓÒÚË ËÁ ÍÛ˜Ë ÔÓÎË„ÓÌÓ‚, ÛÊÂ ÌÂ ‡ÍÚÛ‡Î¸ÌÓ
-    /*std::vector<float> map = GenerateMesh(128, 128);
-    ApplyPerlinNoise(map, 128, 128);*/
+	// –ì–µ–Ω–µ—Ä–∞—Ü–∏—è –ø–ª–æ—Å–∫–æ—Å—Ç–∏ –∏–∑ –∫—É—á–∏ –ø–æ–ª–∏–≥–æ–Ω–æ–≤, —É–∂–µ –Ω–µ –∞–∫—Ç—É–∞–ª—å–Ω–æ
+	/*std::vector<float> map = GenerateMesh(128, 128);
+	ApplyPerlinNoise(map, 128, 128);*/
 
 	Shader shader(
-        (std::filesystem::current_path() / "data/shaders/shader.vert").string(),
-        (std::filesystem::current_path() / "data/shaders/shader.frag").string()
-    );
+		(std::filesystem::current_path() / "data/shaders/shader.vert").string(),
+		(std::filesystem::current_path() / "data/shaders/shader.frag").string()
+	);
 	shader.compile();
 
-	camera.cameraShader = &shader;
+	Shader shaderLightCube(
+		(std::filesystem::current_path() / "data/shaders/lightCube.vert").string(),
+		(std::filesystem::current_path() / "data/shaders/lightCube.frag").string()
+	);
+	shaderLightCube.compile();
 
-    vector<GLfloat> map = concat<GLfloat>({
-        //ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
-        //ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)),
-        //ObjectTool::polygon(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
-        //ObjectTool::polygon(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)),
-        //ObjectTool::polyRect(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 10.0f))
+	vector<GLfloat> map = concat<GLfloat>({
+		// –û—Å–≤–µ—â–∞–µ–º—ã–π –∫—É–±
+		ObjectTool::polyCube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(16.0f, 4.0f, 16.0f)),
+		// –ò—Å—Ç–æ—á–Ω–∏–∫ —Ü–≤–µ—Ç–∞
+		ObjectTool::polyCube(glm::vec3(8.0f, 7.5f, 8.0f), glm::vec3(4.0f, 4.0f, 4.0f)),
 	});
 
-    vector<GLuint> indices = {};
+	vector<GLuint> indices = {};
 
-    FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise.SetFrequency(0.05f);
+	/*FastNoiseLite noise;
+	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	noise.SetFrequency(0.05f);
 
 	int width = 256;
 	int height = 256;
-    for(int z = 0; z < height; z++) {
-        for(int x = 0; x < width; x++) {
+	for(int z = 0; z < height; z++) {
+		for(int x = 0; x < width; x++) {
 			GLfloat glx = static_cast<GLfloat>(x);
-            GLfloat glz = static_cast<GLfloat>(z);
+			GLfloat glz = static_cast<GLfloat>(z);
 
-            map.insert(map.end(), {
-                glx,     noise.GetNoise((float)x, (float)z) * 10.0f, glz,
-                glx + 1, noise.GetNoise((float)x+1, (float)z) * 10.0f, glz,
-                glx,     noise.GetNoise((float)x, (float)z+1) * 10.0f, glz + 1,
-                glx + 1, noise.GetNoise((float)x+1, (float)z+1) * 10.0f, glz + 1
-            });
+			map.insert(map.end(), {
+				glx,     noise.GetNoise((float)x, (float)z) * 10.0f, glz,
+				glx + 1, noise.GetNoise((float)x+1, (float)z) * 10.0f, glz,
+				glx,     noise.GetNoise((float)x, (float)z+1) * 10.0f, glz + 1,
+				glx + 1, noise.GetNoise((float)x+1, (float)z+1) * 10.0f, glz + 1
+			});
 
-            GLuint start = (x + z * width) * 4;
-            indices.insert(indices.end(), {
-                start + 0, start + 1, start + 2,
-                start + 2, start + 1, start + 3
-            });
-        }
-	}
+			GLuint start = (x + z * width) * 4;
+			indices.insert(indices.end(), {
+				start + 0, start + 1, start + 2,
+				start + 2, start + 1, start + 3
+			});
+		}
+	}*/
 
-    // ”ÒÚ‡ÂÎÓ
-    /*for (int i = 0; i < width * height; i++) {
-        vector<GLfloat> preset = {
+	// –£—Å—Ç–∞—Ä–µ–ª–æ
+	/*for (int i = 0; i < width * height; i++) {
+		vector<GLfloat> preset = {
 			1.0f * i, 0.0f, 1.0f * i,
-            (1.0f * i) + 1, 0.0f, 0.0f,
-            0.0f, 0.0f, (1.0f * i) + 1,
-            (1.0f * i) + 1, 0.0f, (1.0f * i) + 1,
-        };
-        map.insert(map.end(), preset.begin(), preset.end());
+			(1.0f * i) + 1, 0.0f, 0.0f,
+			0.0f, 0.0f, (1.0f * i) + 1,
+			(1.0f * i) + 1, 0.0f, (1.0f * i) + 1,
+		};
+		map.insert(map.end(), preset.begin(), preset.end());
 
-        vector<GLuint> preset2 = {
-            0 + ((GLuint)i*4), 1 + ((GLuint)i * 4), 2 + ((GLuint)i * 4),
-            2 + ((GLuint)i * 4), 1 + ((GLuint)i * 4), 3 + ((GLuint)i * 4)
-        };
-        indices.insert(indices.end(), preset2.begin(), preset2.end());
-    }*/
+		vector<GLuint> preset2 = {
+			0 + ((GLuint)i*4), 1 + ((GLuint)i * 4), 2 + ((GLuint)i * 4),
+			2 + ((GLuint)i * 4), 1 + ((GLuint)i * 4), 3 + ((GLuint)i * 4)
+		};
+		indices.insert(indices.end(), preset2.begin(), preset2.end());
+	}*/
 
-    /*auto [map, indices] = ObjectTool::polyRectEBO({
-        0.0f, 1.0f, 0.0f,
-        1.0f, 2.0f, 0.0f,
-        0.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f,
-    });*/
+	/*auto [map, indices] = ObjectTool::polyRectEBO({
+		0.0f, 1.0f, 0.0f,
+		1.0f, 2.0f, 0.0f,
+		0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f,
+	});*/
 
-    GLuint VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+	GLuint VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);
+	glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, map.size() * sizeof(GLfloat), map.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, map.size() * sizeof(GLfloat), map.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);*/
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-     
-    glBindVertexArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0); // –ü–æ–∑–∏—Ü–∏—è
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); // –ü–æ–∑–∏—Ü–∏—è –Ω–æ—Ä–º–∞–ª–∏
+	glEnableVertexAttribArray(1);
+	 
+	glBindVertexArray(0);
 
-    double lastTime = 0.0;
-    int nbFrames = 0;
+	std::cout << "lightCube size: " << map.size() << std::endl;
 
-    while(!glfwWindowShouldClose(window)) {
-        double currentTime = glfwGetTime();
-        nbFrames++;
+	double lastTime = 0.0;
+	int nbFrames = 0;
 
-        // œÂ˜‡Ú¸ Í‡Ê‰˚Â 1.0 ÒÂÍÛÌ‰˚
-        if (currentTime - lastTime >= 1.0) {
-            std::cout << "FPS: " << nbFrames << std::endl;
-            nbFrames = 0;
-            lastTime = currentTime;
-        }
+	glEnable(GL_DEPTH_TEST);
+
+	while(!glfwWindowShouldClose(window)) {
+		double currentTime = glfwGetTime();
+		nbFrames++;
+
+		// –ü–µ—á–∞—Ç—å –∫–∞–∂–¥—ã–µ 1.0 —Å–µ–∫—É–Ω–¥—ã
+		if (currentTime - lastTime >= 1.0) {
+			std::cout << "FPS: " << nbFrames << std::endl;
+			nbFrames = 0;
+			lastTime = currentTime;
+		}
 
 		updateDeltaTime();
-        glfwPollEvents();
+		glfwPollEvents();
 
-        camera.do_movement(deltaTime);
-        camera.updateCamera();
+		camera.do_movement(deltaTime);
+		camera.updateCamera();
 
-        glm::mat4 model = glm::mat4(1.0f);
-        shader.setMat4fv("model", model);
+		camera.setMatsToShader(&shader);
+		camera.setMatsToShader(&shaderLightCube);
 
-        glUseProgram(shader.shaderProgram);
+		glm::mat4 model = glm::mat4(1.0f);
+		shader.setMat4fv("model", model);
+		model = glm::translate(model, glm::vec3(sin(glfwGetTime()) * 12.0f, 0.0f, cos(glfwGetTime()) * 12.0f));
+		shaderLightCube.setMat4fv("model", model);
 
-        glClearColor(0.3f, 0.5f, 0.7f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+		shader.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		shader.setVec3f("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
 
-        glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, map.size() / 3);
-        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+		glm::vec3 lightPos(8.0f + (sin(glfwGetTime()) * 12.0f), 7.5f, 8.0f + (cos(glfwGetTime()) * 12.0f));
+		shader.setVec3f("lightPos", lightPos);
 
-        glfwSwapBuffers(window);
-    }
+		shader.setVec3f("viewPos", camera.position);
 
-    std::cout << "Hello World!";
-    glfwTerminate();
-    return 0;
+		glClearColor(0.3f, 0.5f, 0.7f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(shader.shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glUseProgram(shaderLightCube.shaderProgram);
+		glDrawArrays(GL_TRIANGLES, 36, 36);
+
+		//glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glfwSwapBuffers(window);
+	}
+
+	std::cout << "Hello World!";
+	glfwTerminate();
+	return 0;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+	glViewport(0, 0, width, height);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
 
-    camera.key_callback(window, key, scancode, action, mode);
+	camera.key_callback(window, key, scancode, action, mode);
 }
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	camera.mouse_callback(window, xpos, ypos);
