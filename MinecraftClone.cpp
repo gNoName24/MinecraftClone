@@ -28,6 +28,8 @@
 
 #include "MCCPP/ObjectTool.h"
 
+#include "MCCPP/imgui/init.h"
+
 using namespace std;
 
 float WIDTH = 800.0f;
@@ -92,6 +94,9 @@ int main() {
 	// Включи если хочется снять ограничение фпс
 	// glfwSwapInterval(0);
 
+	// Включение ImGui
+	ImGuiLayer::Init(window);
+
 	// Если окно ресайзнулось
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	// Нажалась клавиша
@@ -102,10 +107,6 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glfwGetCursorPos(window, &camera.lastX, &camera.lastY);
-
-	// Генерация плоскости из кучи полигонов, уже не актуально
-	/*std::vector<float> map = GenerateMesh(128, 128);
-	ApplyPerlinNoise(map, 128, 128);*/
 
 	Shader shader(
 		(std::filesystem::current_path() / "data/shaders/shader.vert").string(),
@@ -125,58 +126,6 @@ int main() {
 		// Источник цвета
 		ObjectTool::polyCube(glm::vec3(8.0f, 7.5f, 8.0f), glm::vec3(4.0f, 4.0f, 4.0f)),
 	});
-
-	vector<GLuint> indices = {};
-
-	/*FastNoiseLite noise;
-	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	noise.SetFrequency(0.05f);
-
-	int width = 256;
-	int height = 256;
-	for(int z = 0; z < height; z++) {
-		for(int x = 0; x < width; x++) {
-			GLfloat glx = static_cast<GLfloat>(x);
-			GLfloat glz = static_cast<GLfloat>(z);
-
-			map.insert(map.end(), {
-				glx,     noise.GetNoise((float)x, (float)z) * 10.0f, glz,
-				glx + 1, noise.GetNoise((float)x+1, (float)z) * 10.0f, glz,
-				glx,     noise.GetNoise((float)x, (float)z+1) * 10.0f, glz + 1,
-				glx + 1, noise.GetNoise((float)x+1, (float)z+1) * 10.0f, glz + 1
-			});
-
-			GLuint start = (x + z * width) * 4;
-			indices.insert(indices.end(), {
-				start + 0, start + 1, start + 2,
-				start + 2, start + 1, start + 3
-			});
-		}
-	}*/
-
-	// Устарело
-	/*for (int i = 0; i < width * height; i++) {
-		vector<GLfloat> preset = {
-			1.0f * i, 0.0f, 1.0f * i,
-			(1.0f * i) + 1, 0.0f, 0.0f,
-			0.0f, 0.0f, (1.0f * i) + 1,
-			(1.0f * i) + 1, 0.0f, (1.0f * i) + 1,
-		};
-		map.insert(map.end(), preset.begin(), preset.end());
-
-		vector<GLuint> preset2 = {
-			0 + ((GLuint)i*4), 1 + ((GLuint)i * 4), 2 + ((GLuint)i * 4),
-			2 + ((GLuint)i * 4), 1 + ((GLuint)i * 4), 3 + ((GLuint)i * 4)
-		};
-		indices.insert(indices.end(), preset2.begin(), preset2.end());
-	}*/
-
-	/*auto [map, indices] = ObjectTool::polyRectEBO({
-		0.0f, 1.0f, 0.0f,
-		1.0f, 2.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-	});*/
 
 	GLuint VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -205,7 +154,21 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
+	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
+
+	glm::vec3 lightAmbient = glm::vec3(0.2f, 0.2f, 0.2f);
+	glm::vec3 lightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::vec3 lightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	glm::vec3 materialAmbient = glm::vec3(0.24725f, 0.1995f, 0.0745f);
+	glm::vec3 materialDiffuse = glm::vec3(0.75164f, 0.60648f, 0.22648f);
+	glm::vec3 materialSpecular = glm::vec3(0.628281f, 0.555802f, 0.366065f);
+	float materialShininess = 0.4 * 128.0;
+
 	while(!glfwWindowShouldClose(window)) {
+		ImGuiLayer::UpdateMousePosition(window);
+
 		double currentTime = glfwGetTime();
 		nbFrames++;
 
@@ -219,24 +182,46 @@ int main() {
 		updateDeltaTime();
 		glfwPollEvents();
 
+		ImGuiLayer::BeginFrame();
+
 		camera.do_movement(deltaTime);
-		camera.updateCamera();
+		//camera.updateCamera();
 
 		camera.setMatsToShader(&shader);
 		camera.setMatsToShader(&shaderLightCube);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		shader.setMat4fv("model", model);
-		model = glm::translate(model, glm::vec3(sin(glfwGetTime()) * 12.0f, 0.0f, cos(glfwGetTime()) * 12.0f));
 		shaderLightCube.setMat4fv("model", model);
 
-		shader.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-		shader.setVec3f("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-
-		glm::vec3 lightPos(8.0f + (sin(glfwGetTime()) * 12.0f), 7.5f, 8.0f + (cos(glfwGetTime()) * 12.0f));
-		shader.setVec3f("lightPos", lightPos);
+		glm::vec3 lightPos(8.0f, 7.5f, 8.0f);
+		shader.setVec3f("light.position", lightPos);
 
 		shader.setVec3f("viewPos", camera.position);
+
+		ImGui::Begin("Window");
+		ImGui::DragFloat3("lightColor", &lightColor.x, 0.01f);
+		ImGui::DragFloat3("objectColor", &objectColor.x, 0.01f);
+		ImGui::DragFloat3("light.ambient", &lightAmbient.x, 0.01f);
+		ImGui::DragFloat3("light.diffuse", &lightDiffuse.x, 0.01f);
+		ImGui::DragFloat3("light.specular", &lightSpecular.x, 0.01f);
+		ImGui::DragFloat3("material.ambient", &materialAmbient.x, 0.01f);
+		ImGui::DragFloat3("material.diffuse", &materialDiffuse.x, 0.01f);
+		ImGui::DragFloat3("material.specular", &materialSpecular.x, 0.01f);
+		ImGui::DragFloat("material.shininess", &materialShininess, 0.2f);
+		ImGui::End();
+
+		shader.setVec3f("lightColor", lightColor);
+		shader.setVec3f("objectColor", objectColor);
+
+		shader.setVec3f("light.ambient", lightAmbient);
+		shader.setVec3f("light.diffuse", lightDiffuse);
+		shader.setVec3f("light.specular", lightSpecular);
+
+		shader.setVec3f("material.ambient", materialAmbient);
+		shader.setVec3f("material.diffuse", materialDiffuse);
+		shader.setVec3f("material.specular", materialSpecular);
+		shader.setFloat("material.shininess", materialShininess);
 
 		glClearColor(0.3f, 0.5f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -251,10 +236,12 @@ int main() {
 		//glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		ImGuiLayer::EndFrame();
 		glfwSwapBuffers(window);
 	}
 
 	std::cout << "Hello World!";
+	ImGuiLayer::Shutdown();
 	glfwTerminate();
 	return 0;
 }
@@ -267,8 +254,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
+	if(key == GLFW_KEY_TAB && action == GLFW_PRESS) {
+		if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+			double x, y;
+			glfwGetCursorPos(window, &x, &y);
+			ImGuiIO& io = ImGui::GetIO();
+			io.MousePos = ImVec2((float)x, (float)y);
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+	}
+
 	camera.key_callback(window, key, scancode, action, mode);
 }
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse)
+		return;
+
 	camera.mouse_callback(window, xpos, ypos);
 }

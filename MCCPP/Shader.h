@@ -83,7 +83,7 @@ public:
 	}
 	void setFloat(const std::string& name, float value) const {
 		glUseProgram(shaderProgram);
-		glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), value);
+		glUniform1f(glGetUniformLocation(shaderProgram, name.c_str()), value);
 	}
 	void setMat4fv(const std::string& name, glm::mat4 value) const {
 		glUseProgram(shaderProgram);
